@@ -1,8 +1,8 @@
 // 名刺の写真から、名前・会社名・肩書きを読む。写真は読むときだけ受け取り、保存しない
-const PROMPT = `これは日本の名刺の写真です。名刺に書いてある文字だけを読んで、次のJSONだけを返してください。説明は不要です。
-{"name":"氏名（漢字。読みがなは入れない）","company":"会社名・屋号","title":"肩書き"}
-読めない項目は空文字にしてください。推測で作らないでください。`;
-const MODELS = ['@cf/meta/llama-4-scout-17b-16e-instruct', '@cf/mistralai/mistral-small-3.1-24b-instruct'];
+const PROMPT = `これは日本の名刺の写真です。名刺が2枚以上写っていることもあります。写っている名刺を1枚ずつ、書いてある文字だけを読んで、次のJSONだけを返してください。説明は不要です。
+{"cards":[{"name":"氏名（漢字。読みがなは入れない）","company":"会社名・屋号（名刺に書いてある表記のまま。カタカナならカタカナ）","title":"肩書き・部署"}]}
+読めない項目は空文字にしてください。推測で作らないでください。英語に言いかえないでください。`;
+const MODELS = ['@cf/mistralai/mistral-small-3.1-24b-instruct', '@cf/meta/llama-4-scout-17b-16e-instruct'];
 
 export async function onRequestPost({ request, env }) {
   let body;
@@ -21,7 +21,9 @@ export async function onRequestPost({ request, env }) {
       const m = last.match(/\{[\s\S]*\}/);
       if (!m) { errs.push(model + ': ' + last.slice(0, 120)); continue; }
       const o = JSON.parse(m[0]);
-      return json({ name: s(o.name), company: s(o.company), title: s(o.title) });
+      const cards = (Array.isArray(o.cards) ? o.cards : [o]).slice(0, 5).map(c => ({ name: s(c.name), company: s(c.company), title: s(c.title) })).filter(c => c.name || c.company || c.title);
+      const first = cards.find(c => c.name) || cards[0] || { name: '', company: '', title: '' };
+      return json({ name: first.name, company: first.company, title: first.title, cards });
     } catch (e) { last = String(e && e.message || e); errs.push(model + ': ' + last.slice(0, 160)); }
   }
   return json({ error: 'read failed', detail: errs }, 502);
