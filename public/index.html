@@ -88,6 +88,7 @@ header::before{content:"";position:absolute;right:0;top:0;width:0;height:0;borde
 :root[data-fab="center"] .fab{right:auto;left:50%;transform:translateX(-50%)}
 :root[data-fab="left"] .fab{right:auto;left:max(16px,env(safe-area-inset-left))}
 .seg{display:flex;gap:6px;margin-top:6px}.seg button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:10px;padding:8px}.seg button.on{border-color:var(--accent);color:var(--accent);font-weight:bold}
+.delbox{margin-top:18px;border-top:1px solid var(--line);padding-top:10px;text-align:right}.del{border:none;background:none;color:var(--sub);font-size:13px;text-decoration:underline}.delbox p{text-align:left;font-size:14px;margin:6px 0}
 </style>
 </head>
 <body>
@@ -151,6 +152,7 @@ header::before{content:"";position:absolute;right:0;top:0;width:0;height:0;borde
 const DB='mirai-goen-cho', ST='people';
 function db(){return new Promise((ok,ng)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore(ST,{keyPath:'id'});r.onsuccess=()=>ok(r.result);r.onerror=()=>ng(r.error)})}
 async function all(){try{const d=await db();return await new Promise(ok=>{const q=d.transaction(ST).objectStore(ST).getAll();q.onsuccess=()=>ok(q.result||[]);q.onerror=()=>ok([])})}catch(e){return []}}
+async function del(id){try{const d=await db();await new Promise(ok=>{const t=d.transaction(ST,'readwrite');t.objectStore(ST).delete(id);t.oncomplete=ok;t.onerror=ok})}catch(e){}}
 async function put(p){try{const d=await db();await new Promise(ok=>{const t=d.transaction(ST,'readwrite');t.objectStore(ST).put(p);t.oncomplete=ok;t.onerror=ok})}catch(e){}}
 
 
@@ -233,9 +235,11 @@ function openDetail(id){
   ${(()=>{const h=honshitsu(p.birth);return h?`<div class="kv" style="border-left:4px solid var(--accent)"><b>本質（誕生日から）</b><span style="font-size:17px;font-weight:bold;color:var(--accent)">${h.type}</span>　${h.gname}<br><small>${h.kw}／${h.legend}</small><br>💬 話し方のコツ：${h.tell}<br><a href="https://brain-market.com/u/fuming35/a/b3AzM4UjMgoTZsNWa0JXY" target="_blank" rel="noopener" style="color:var(--accent);font-size:13px">▶ もっと知りたい方はこちら：『相性診断のトリセツ』（有料）</a></div>`:''})()}<div class="kv"><b>誕生日</b>${p.birth?`${fmt(p.birth)}（次は あと${daysTo(nb)}日）／保険年齢が上がる日：${fmt(iso(hb))}`:'まだ聞いていない'}</div>
   <div class="chk"><input type="checkbox" id="dDone" ${p.done?'checked':''}><label for="dDone" style="margin:0;color:var(--fg)">${esc(p.next)}　が済んだ</label></div>
   ${p.birth?`<div class="kv"><b>おめでとうメッセージ（ひな形）</b><div class="copybox" id="hbd">${esc(msg)}</div></div>`:''}
-  <div class="actions">${p.birth?'<button class="btn sub" id="cpMsg">メッセージをコピー</button>':''}<button class="btn" id="closeD">とじる</button></div>`;
+  <div class="actions">${p.birth?'<button class="btn sub" id="cpMsg">メッセージをコピー</button>':''}<button class="btn" id="closeD">とじる</button></div>
+  ${p.sample?'':`<div class="delbox"><button class="del" id="delBtn" type="button">この人を削除する</button><div id="delAsk" hidden><p>${esc(p.name||'この人')}を削除します。写真・声・メモも消えて、元に戻せません。</p><div class="actions"><button class="btn sub" id="delNo" type="button">やめる</button><button class="btn" id="delYes" type="button">削除する</button></div></div></div>`}`;
  const d=document.getElementById('detailDlg'); d.showModal();
  document.getElementById('closeD').onclick=()=>d.close();
+ const db1=document.getElementById('delBtn');if(db1){db1.onclick=()=>{db1.hidden=true;document.getElementById('delAsk').hidden=false};document.getElementById('delNo').onclick=()=>{db1.hidden=false;document.getElementById('delAsk').hidden=true};document.getElementById('delYes').onclick=async()=>{await del(p.id);d.close();await load()}}
  document.getElementById('dDone').onchange=async e=>{p.done=e.target.checked; if(!p.sample) await put(p); render()};
  const cm=document.getElementById('cpMsg'); if(cm) cm.onclick=()=>navigator.clipboard.writeText(msg).then(()=>cm.textContent='コピーしました',()=>cm.textContent='長押しでコピーしてください');
 }
@@ -250,7 +254,7 @@ async function readMeishi(d){const st=document.getElementById('ocrState');st.hid
  try{const r=await fetch('/api/meishi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({image:d})});const o=await r.json();
   if(!r.ok||o.error)throw 0;
   const n=document.getElementById('iName');if(o.name&&!n.value.trim())n.value=o.name+'さん';
-  const extra=[o.company,o.title].filter(Boolean).join('　');const mm=document.getElementById('iMemo');if(extra&&!mm.value.includes(extra))mm.value=(extra+(mm.value?'\n'+mm.value:''));
+  const extra=(o.cards&&o.cards.length?o.cards:[o]).map(c=>[c.company,c.title].filter(Boolean).join('　')).filter(Boolean).join('\n');const mm=document.getElementById('iMemo');if(extra&&!mm.value.includes(extra))mm.value=(extra+(mm.value?'\n'+mm.value:''));
   st.textContent=(o.name||extra)?'名刺から読みました。まちがいがあれば直してください':'名刺の文字が読めませんでした。手で入れてください'}
  catch(e){st.textContent='名刺の文字が読めませんでした。手で入れてください'}}
 readImg(document.getElementById('fShot'),d=>shotImg=d,'w2');
