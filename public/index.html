@@ -116,7 +116,8 @@ header::before{content:"";position:absolute;right:0;top:0;width:0;height:0;borde
     <button type="button" class="btn" id="recBtn">● 録音スタート</button>
     <span id="recState" class="empty">相手の声を録るときは、ひとこと断ってから</span>
   </div>
-  <label>お名前（あとで入れてもOK）</label>
+  <p class="empty" id="ocrState" hidden></p>
+  <label>お名前（名刺を撮ると自動で入ります）</label>
   <input id="iName" placeholder="例：山田花子さん">
   <label>出会った場所</label>
   <input id="iEvent" placeholder="例：赤坂の交流会">
@@ -187,7 +188,7 @@ function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>'
 
 function render(){
  const m=document.getElementById('main'); let h='';
- if(people.some(p=>p.sample)) h+=`<div class="notice"><b>見本データが入っています。</b>「見本」とついた人は架空の人物です。登録した内容は、このスマホの中だけに保存されます（本質を出すときだけ、誕生日の日付をサーバーに送って計算します。保存はしません）。</div>`;
+ if(people.some(p=>p.sample)) h+=`<div class="notice"><b>見本データが入っています。</b>「見本」とついた人は架空の人物です。登録した内容は、このスマホの中だけに保存されます（名刺の文字を読むときは名刺の写真を、本質を出すときは誕生日の日付を、サーバーに送って読み取り・計算します。どちらも保存はしません）。</div>`;
  if(tab==='faces'){
   h+='<div class="grid">'+people.map(p=>`<div class="face" data-id="${p.id}"><div class="ph" style="background:${p.color||'var(--accent)'}">${(p.shot||p.card)?`<img src="${p.shot||p.card}" alt="">`:esc((p.name||'？').replace('見本 ','').slice(0,1))}${p.voice?'<span class="tag">🎙 声</span>':''}</div><div class="nm">${esc(p.name||'（名前まだ）')}</div><div class="ev">${fmt(p.date)}・${esc(p.event)}</div>${p.done?'':`<div class="todo">● ${esc(p.next)}</div>`}</div>`).join('')+'</div>';
  }
@@ -243,8 +244,15 @@ function openDetail(id){
 const addDlg=document.getElementById('addDlg');
 document.getElementById('addBtn').onclick=()=>{cardImg=shotImg=voiceUrl='';['w1','w2','w3'].forEach(i=>document.getElementById(i).classList.remove('done'));document.getElementById('addForm').reset();document.getElementById('iDate').value=iso(today);document.getElementById('iNext').value='お礼のLINEを送る';document.getElementById('recBox').hidden=true;addDlg.showModal()};
 document.getElementById('cancelAdd').onclick=()=>addDlg.close();
-function readImg(input,cb,w){input.onchange=()=>{const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const s=Math.min(1,800/Math.max(img.width,img.height));c.width=img.width*s;c.height=img.height*s;c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.8));document.getElementById(w).classList.add('done')};img.src=r.result};r.readAsDataURL(f)}}
-readImg(document.getElementById('fCard'),d=>cardImg=d,'w1');
+function readImg(input,cb,w,max=800){input.onchange=()=>{const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const s=Math.min(1,max/Math.max(img.width,img.height));c.width=img.width*s;c.height=img.height*s;c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.8));document.getElementById(w).classList.add('done')};img.src=r.result};r.readAsDataURL(f)}}
+readImg(document.getElementById('fCard'),d=>{cardImg=d;readMeishi(d)},'w1',1400);
+async function readMeishi(d){const st=document.getElementById('ocrState');st.hidden=false;st.textContent='名刺を読んでいます…';
+ try{const r=await fetch('/api/meishi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({image:d})});const o=await r.json();
+  if(!r.ok||o.error)throw 0;
+  const n=document.getElementById('iName');if(o.name&&!n.value.trim())n.value=o.name+'さん';
+  const extra=[o.company,o.title].filter(Boolean).join('　');const mm=document.getElementById('iMemo');if(extra&&!mm.value.includes(extra))mm.value=(extra+(mm.value?'\n'+mm.value:''));
+  st.textContent=(o.name||extra)?'名刺から読みました。まちがいがあれば直してください':'名刺の文字が読めませんでした。手で入れてください'}
+ catch(e){st.textContent='名刺の文字が読めませんでした。手で入れてください'}}
 readImg(document.getElementById('fShot'),d=>shotImg=d,'w2');
 document.getElementById('w3').onclick=()=>{document.getElementById('recBox').hidden=false};
 let rec=null,chunks=[];
