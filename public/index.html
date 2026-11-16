@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>未来のご縁帳</title>
+<style>
+:root{
+  --bg:#ffffff; --card:#ffffff; --fg:#111111; --sub:#6b6461; --line:#e7e2de;
+  --accent:#d1201b; --accent-soft:#fcecea; --gold:#b39150; --ok:#2e6b4f;
+  --hd-bg:#0d0d0d; --hd-fg:#ffffff; --hd-sub:#c9a95c; --shadow:rgba(209,32,27,.35);
+}
+:root[data-theme="moss"]{--bg:#f6f5f0;--card:#fff;--fg:#1f2a20;--sub:#6a705f;--line:#e3e1d6;--accent:#55663f;--accent-soft:#eceee3;--gold:#b89b5e;--hd-bg:#2f3a27;--hd-fg:#fbf8ef;--hd-sub:#d8c38f;--shadow:rgba(85,102,63,.35)}
+:root[data-theme="bordeaux"]{--bg:#fbf8f6;--card:#fff;--fg:#26161a;--sub:#7a6468;--line:#ece1e3;--accent:#7b1830;--accent-soft:#f5e6ea;--gold:#b08a4f;--hd-bg:#3b0d18;--hd-fg:#fff;--hd-sub:#d9b779;--shadow:rgba(123,24,48,.35)}
+:root[data-theme="navy"]{--bg:#f7f8fa;--card:#fff;--fg:#121a2b;--sub:#5f6779;--line:#e1e5ec;--accent:#1d2f5c;--accent-soft:#e7ebf4;--gold:#b6944f;--hd-bg:#121a2b;--hd-fg:#fff;--hd-sub:#d6b56d;--shadow:rgba(29,47,92,.35)}
+:root[data-theme="noir"]{--bg:#111111;--card:#1b1b1b;--fg:#f4f1ea;--sub:#a8a199;--line:#2e2b28;--accent:#c9a95c;--accent-soft:#2a2418;--gold:#c9a95c;--hd-bg:#000;--hd-fg:#f4f1ea;--hd-sub:#c9a95c;--shadow:rgba(201,169,92,.35);color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;font-size:16px;line-height:1.6}
+header{position:sticky;top:0;z-index:5;background:var(--hd-bg);color:var(--hd-fg);border-bottom:2px solid var(--gold);padding:12px max(16px,env(safe-area-inset-left)) 8px}
+h1{margin:0;font-size:20px;letter-spacing:.12em;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px}
+h1 small{font-size:12px;color:var(--hd-sub);letter-spacing:.05em;font-weight:normal;margin-left:6px}
+nav{display:flex;gap:6px;margin-top:8px;overflow-x:auto}
+nav button{flex:none;border:1px solid rgba(255,255,255,.25);background:transparent;color:var(--hd-fg);border-radius:999px;padding:6px 14px;font-size:14px}
+nav button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+main{padding:12px max(16px,env(safe-area-inset-left)) 120px;max-width:720px;margin:0 auto}
+.notice{background:var(--accent-soft);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+.notice b{color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.face{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer}
+.face .ph{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;position:relative}
+.face .ph img{width:100%;height:100%;object-fit:cover}
+.face .ph .tag{position:absolute;right:6px;top:6px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;border-radius:6px;padding:1px 6px}
+.face .nm{padding:6px 10px 2px;font-weight:bold;font-size:15px}
+.face .ev{padding:0 10px 8px;font-size:12px;color:var(--sub)}
+.todo{color:var(--accent);font-size:12px;padding:0 10px 8px}
+section h2{font-size:16px;margin:18px 0 8px}
+.row{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+.av{width:44px;height:44px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+.row .tx{flex:1;min-width:0}
+.row .tx small{color:var(--sub)}
+.btn{border:none;background:var(--accent);color:#fff;border-radius:10px;padding:10px 14px;font-size:15px}
+.btn.sub{background:var(--card);color:var(--fg);border:1px solid var(--line)}
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));z-index:9;border:none;background:var(--accent);color:#fff;border-radius:999px;padding:14px 20px;font-size:16px;font-weight:bold;box-shadow:0 4px 14px var(--shadow)}
+dialog{background:var(--card);color:var(--fg);border:none;border-radius:16px;padding:0;width:min(560px,94vw);max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+.dlg{padding:16px}
+.dlg h3{margin:0 0 10px}
+label{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
+input,textarea,select{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--card);color:var(--fg)}
+textarea{min-height:70px}
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.way{border:1px dashed var(--accent);border-radius:12px;padding:10px 4px;text-align:center;font-size:13px;color:var(--accent);background:var(--accent-soft);cursor:pointer;position:relative}
+.way input{position:absolute;inset:0;opacity:0}
+.way.done{background:#e8f5ee;border-color:var(--ok);color:var(--ok)}
+.rec{display:flex;gap:8px;align-items:center;margin-top:8px}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.detail .top{display:flex;gap:12px;align-items:center}
+.detail .top .av{width:72px;height:72px;font-size:28px}
+.kv{background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:8px;font-size:14px}
+.kv b{display:block;font-size:12px;color:var(--sub);font-weight:normal}
+.photos{display:flex;gap:8px;margin-top:8px}
+.photos img{width:48%;border-radius:10px;object-fit:cover;aspect-ratio:4/3}
+.chk{display:flex;gap:8px;align-items:center;margin-top:8px}
+.chk input{width:auto}
+.ins{border-left:4px solid var(--gold)}
+.copybox{white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:10px;font-size:13px;max-height:240px;overflow:auto}
+.empty{color:var(--sub);font-size:14px}
+.sns{display:flex;flex-wrap:wrap;gap:6px}
+.sns label{display:flex;align-items:center;gap:4px;margin:0;border:1px solid var(--line);border-radius:999px;padding:5px 10px;color:var(--fg);font-size:14px;background:var(--card)}
+.sns input{width:auto}
+.chip{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 8px;font-size:12px;margin:2px 4px 0 0}
+.theme{margin-left:auto;font-family:"Hiragino Sans",sans-serif;font-size:12px;border:1px solid var(--hd-sub);color:var(--hd-sub);background:transparent;border-radius:999px;padding:3px 10px;letter-spacing:0}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.sw{border:2px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--card);color:var(--fg);font-size:13px;display:flex;align-items:center;gap:8px}
+.sw.on{border-color:var(--accent)}
+.sw i{display:inline-flex;border-radius:999px;overflow:hidden;width:42px;height:18px}
+.sw i b{flex:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>未来のご縁帳<small>今日のご縁を、未来につなぐ</small><button class="theme" id="themeBtn" type="button">色</button></h1>
+  <nav>
+    <button data-tab="faces" class="on">顔で探す</button>
+    <button data-tab="voice">声で探す</button>
+    <button data-tab="events">出会った場所</button>
+    <button data-tab="birthday">誕生日</button>
+    <button data-tab="todo">次にすること</button>
+    <button data-tab="export">書き出し</button>
+  </nav>
+</header>
+<main id="main"></main>
+<button class="fab" id="addBtn">＋ 今日の出会いを登録</button>
+
+<dialog id="addDlg"><form class="dlg" id="addForm" method="dialog">
+  <h3>今日の出会いを登録</h3>
+  <div class="ways">
+    <div class="way" id="w1">📇<br>名刺の写真<input type="file" accept="image/*" capture="environment" id="fCard"></div>
+    <div class="way" id="w2">🤳<br>ツーショット<input type="file" accept="image/*" capture="user" id="fShot"></div>
+    <div class="way" id="w3">🎙<br>声で残す</div>
+  </div>
+  <div class="rec" id="recBox" hidden>
+    <button type="button" class="btn" id="recBtn">● 録音スタート</button>
+    <span id="recState" class="empty">相手の声を録るときは、ひとこと断ってから</span>
+  </div>
+  <label>お名前（あとで入れてもOK）</label>
+  <input id="iName" placeholder="例：山田花子さん">
+  <label>出会った場所</label>
+  <input id="iEvent" placeholder="例：赤坂の交流会">
+  <label>会った日</label>
+  <input id="iDate" type="date">
+  <label>誕生日（聞けたら）</label>
+  <input id="iBirth" type="date">
+  <label>どんな人・話したこと（スマホのマイクで話して入れられます）</label>
+  <textarea id="iMemo" placeholder="例：AIの仕事。背が高くてメガネ。娘さんが受験生"></textarea>
+  <label>つながっているSNS（タップで印）</label>
+  <div class="sns" id="iSns">
+    <label><input type="checkbox" value="LINE">LINE</label>
+    <label><input type="checkbox" value="Facebook">Facebook</label>
+    <label><input type="checkbox" value="Instagram">Instagram</label>
+    <label><input type="checkbox" value="X">X</label>
+    <label><input type="checkbox" value="メルマガ">メルマガ</label>
+  </div>
+  <label>次にすること</label>
+  <input id="iNext" value="お礼のLINEを送る">
+  <div class="actions">
+    <button type="button" class="btn sub" id="cancelAdd">やめる</button>
+    <button type="button" class="btn" id="saveAdd">登録する</button>
+  </div>
+</form></dialog>
+
+<dialog id="themeDlg"><div class="dlg"><h3>色をえらぶ</h3><p class="empty">選んだ色は、このスマホに覚えておきます。</p><div class="swatches" id="swatches"></div><div class="actions"><button class="btn" id="closeTheme" type="button">とじる</button></div></div></dialog>
+<dialog id="detailDlg"><div class="dlg detail" id="detailBody"></div></dialog>
+
+<script>
+// ===== 保存（このスマホの中だけ：IndexedDB） =====
+const DB='mirai-goen-cho', ST='people';
+function db(){return new Promise((ok,ng)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore(ST,{keyPath:'id'});r.onsuccess=()=>ok(r.result);r.onerror=()=>ng(r.error)})}
+async function all(){try{const d=await db();return await new Promise(ok=>{const q=d.transaction(ST).objectStore(ST).getAll();q.onsuccess=()=>ok(q.result||[]);q.onerror=()=>ok([])})}catch(e){return []}}
+async function put(p){try{const d=await db();await new Promise(ok=>{const t=d.transaction(ST,'readwrite');t.objectStore(ST).put(p);t.oncomplete=ok;t.onerror=ok})}catch(e){}}
+
+
+// ===== 本質（誕生日からわかる、その人のいちばん深いタイプ）。5層のうち本質だけ =====
+const LEG={"挑戦":"ダイアナ／宗一郎","躍進":"ヘレン・ケラー／エジソン","知略":"クレオパトラ／孫武","感性":"シャネル／レノン","采配":"サッチャー／家康","包容":"ヴィクトリア女王／孔明","魅了":"オードリー／ディズニー","執念":"ナイチンゲール／ベートーヴェン","独創":"キュリー夫人／ダ・ヴィンチ","調和":"テレサ／シュヴァイツァー","飛翔":"ジャンヌ・ダルク／モーツァルト","至高":"エリザベス女王／アレクサンダー"};
+const KW={"魅了":"愛され・華・場を明るく","感性":"センス・美意識・独自の感性","包容":"包み込む・安心・粘り","調和":"和・思いやり・信頼","独創":"一匹狼の独創・オリジナリティ","躍進":"行動力・突破・努力","采配":"統率・全体采配・結果","知略":"戦略・先読み・軍師","挑戦":"即断・自由・新しい扉","至高":"誇り・トップ・品格","執念":"情熱・やり抜く・現役","飛翔":"直感・天才性・自由に飛ぶ"};
+const GNAME={H:"ヒューマン（情と信頼）",E:"エコノミー（実利と戦略）",A:"オーソリティ（誇りと品格）"};
+const TELL={H:"つながり・共感・安心を先に。「一人で抱えなくていい／一緒にやろう」",E:"結論・価値・損得を先に。「これは、こう得です」",A:"特別感・一流感を先に。「あなただけの〜」"};
+const HCACHE={};
+async function fetchHon(b){if(!b||HCACHE[b]!==undefined)return;try{const r=await fetch('/api/honshitsu?b='+encodeURIComponent(b));HCACHE[b]=r.ok?await r.json():null}catch(e){HCACHE[b]=null}}
+async function fillHon(){await Promise.all(people.filter(p=>p.birth).map(p=>fetchHon(p.birth)))}
+function honshitsu(b){const x=b&&HCACHE[b];if(!x||!x.type)return null;const t=x.type,g=x.g;return {type:t,g,legend:LEG[t],kw:KW[t],gname:GNAME[g],tell:TELL[g]}}
+
+// ===== 見本データ（架空の人物） =====
+const today=new Date();
+function iso(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+function addDays(n){const d=new Date(today);d.setDate(d.getDate()+n);return d}
+const SAMPLE=[
+ {id:'s1',name:'見本 さくらさん',event:'赤坂の交流会',date:iso(addDays(-1)),birth:'1968-'+iso(addDays(5)).slice(5),memo:'保険代理店。お子さんが2人。名刺入れが赤',sns:['LINE','Facebook'],next:'お礼のLINEを送る',done:false,color:'var(--accent)',sample:true},
+ {id:'s2',name:'見本 たろうさん',event:'赤坂の交流会',date:iso(addDays(-1)),birth:'',memo:'税理士。ゴルフ好き。声で登録（写真なし）',next:'資料を送る',done:false,color:'var(--hd-bg)',voice:true,sample:true},
+ {id:'s3',name:'見本 ゆりさん',event:'渋谷の交流会',date:iso(addDays(-21)),birth:'1972-'+iso(addDays(40)).slice(5),memo:'カフェ開業を準備中。帝王交渉術に興味',sns:['Facebook','Instagram'],next:'ランチに誘う',done:true,color:'var(--gold)',sample:true},
+ {id:'s4',name:'見本 けんさん',event:'渋谷の交流会',date:iso(addDays(-21)),birth:'1965-'+iso(addDays(-150)).slice(5),memo:'中小企業診断士。AIに興味あり',next:'AIの事例を送る',done:false,color:'#3a3a3a',sample:true},
+];
+
+let people=[], tab='faces', cardImg='', shotImg='', voiceUrl='';
+async function load(){const mine=await all();people=[...mine,...SAMPLE];render();await fillHon();render()}
+
+function av(p,cls='av'){const s=p.shot||p.card;const ini=(p.name||'？').replace('見本 ','').slice(0,1);
+ return `<div class="${cls}" style="background:${p.color||'var(--accent)'}">${s?`<img src="${s}" alt="">`:ini}</div>`}
+function fmt(d){if(!d)return '';const [y,m,dd]=d.split('-');return `${+m}月${+dd}日`}
+function nextBirthday(b){if(!b)return null;const [y,m,d]=b.split('-').map(Number);let n=new Date(today.getFullYear(),m-1,d);const t0=new Date(today.getFullYear(),today.getMonth(),today.getDate());if(n<t0)n=new Date(today.getFullYear()+1,m-1,d);return n}
+function halfBirthday(b){if(!b)return null;const [y,m,d]=b.split('-').map(Number);let n=new Date(today.getFullYear(),m-1+6,d);const t0=new Date(today.getFullYear(),today.getMonth(),today.getDate());if(n<t0)n=new Date(today.getFullYear()+1,m-1+6,d);return n}
+function daysTo(d){const t0=new Date(today.getFullYear(),today.getMonth(),today.getDate());return Math.round((d-t0)/86400000)}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function render(){
+ const m=document.getElementById('main'); let h='';
+ if(people.some(p=>p.sample)) h+=`<div class="notice"><b>見本データが入っています。</b>「見本」とついた人は架空の人物です。登録した内容は、このスマホの中だけに保存されます（本質を出すときだけ、誕生日の日付をサーバーに送って計算します。保存はしません）。</div>`;
+ if(tab==='faces'){
+  h+='<div class="grid">'+people.map(p=>`<div class="face" data-id="${p.id}"><div class="ph" style="background:${p.color||'var(--accent)'}">${(p.shot||p.card)?`<img src="${p.shot||p.card}" alt="">`:esc((p.name||'？').replace('見本 ','').slice(0,1))}${p.voice?'<span class="tag">🎙 声</span>':''}</div><div class="nm">${esc(p.name||'（名前まだ）')}</div><div class="ev">${fmt(p.date)}・${esc(p.event)}</div>${p.done?'':`<div class="todo">● ${esc(p.next)}</div>`}</div>`).join('')+'</div>';
+ }
+ if(tab==='voice'){
+  const v=people.filter(p=>p.voice||p.voiceUrl);
+  h+='<section><h2>🎙 声で残した人</h2><p class="empty">再生ボタンで、そのときの声がすぐ聞けます。</p>'+(v.length?v.map(p=>`<div class="row" data-id="${p.id}">${av(p)}<div class="tx"><b>${esc(p.name||'（名前まだ）')}</b><br><small>${fmt(p.date)}・${esc(p.event)}</small>${p.voiceUrl?`<audio controls src="${p.voiceUrl}" style="width:100%;margin-top:6px" onclick="event.stopPropagation()"></audio>`:'<br><small>（見本のため音声なし）</small>'}</div></div>`).join(''):'<p class="empty">声で登録した人はまだいません。「＋今日の出会いを登録」→「声で残す」から登録できます。</p>')+'</section>';
+ }
+ if(tab==='events'){
+  const g={};people.forEach(p=>{const k=p.date+'｜'+p.event;(g[k]=g[k]||[]).push(p)});
+  Object.keys(g).sort().reverse().forEach(k=>{const [d,e]=k.split('｜');h+=`<section><h2>${fmt(d)}　${esc(e)}（${g[k].length}人）</h2>`+g[k].map(row).join('')+'</section>'});
+ }
+ if(tab==='birthday'){
+  const list=people.filter(p=>p.birth).map(p=>({p,n:nextBirthday(p.birth),h:halfBirthday(p.birth)})).sort((a,b)=>a.n-b.n);
+  h+='<section><h2>🎂 もうすぐ誕生日</h2>'+(list.length?list.map(x=>row(x.p,`${fmt(iso(x.n))}（あと${daysTo(x.n)}日）・本質：${(honshitsu(x.p.birth)||{type:'…'}).type}`)).join(''):'<p class="empty">誕生日が入っている人はまだいません</p>')+'</section>';
+  const ins=people.filter(p=>p.birth).map(p=>({p,h:halfBirthday(p.birth)})).sort((a,b)=>a.h-b.h);
+  h+='<section><h2>🛡 保険年齢が上がる日（保険の営業向け）</h2><p class="empty">誕生日のおよそ6か月後に、保険年齢が1つ上がります。この日の前にご案内できます。※数え方は保険会社によって違うことがあります</p>'+ins.map(x=>row(x.p,`${fmt(iso(x.h))}（あと${daysTo(x.h)}日）`,'ins')).join('')+'</section>';
+ }
+ if(tab==='todo'){
+  const t=people.filter(p=>!p.done);
+  h+='<section><h2>次にすること（まだの人）</h2>'+(t.length?t.map(p=>row(p,'● '+esc(p.next))).join(''):'<p class="empty">全部できています🌸</p>')+'</section>';
+ }
+ if(tab==='export'){
+  const lines=['| 会った日 | 場所・会 | お名前 | どんな人・話したこと | 誕生日 | 次にすること |','|---|---|---|---|---|---|',...people.filter(p=>!p.sample).map(p=>`| ${p.date} | ${p.event} | ${p.name} | ${(p.memo||'').replace(/\n/g,' ')} | ${p.birth||''} | ${p.next}${p.done?'（済）':''} |`)];
+  h+=`<section><h2>名刺台帳の形で書き出し</h2><p class="empty">コピーして、秘書（クロード）に渡せます。見本の人は入りません。</p><div class="copybox" id="cb">${esc(lines.join('\n'))}</div><div class="actions"><button class="btn" id="copyBtn">コピーする</button></div></section>`;
+ }
+ m.innerHTML=h;
+ m.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>openDetail(el.dataset.id));
+ const cbn=document.getElementById('copyBtn'); if(cbn) cbn.onclick=()=>{const t=document.getElementById('cb').innerText;navigator.clipboard.writeText(t).then(()=>cbn.textContent='コピーしました',()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('cb'));getSelection().removeAllRanges();getSelection().addRange(r);cbn.textContent='選択しました（コピーしてください）'})};
+}
+function row(p,sub,cls=''){return `<div class="row ${cls}" data-id="${p.id}">${av(p)}<div class="tx"><b>${esc(p.name||'（名前まだ）')}</b><br><small>${sub||fmt(p.date)+'・'+esc(p.event)}</small></div></div>`}
+
+function openDetail(id){
+ const p=people.find(x=>x.id===id); if(!p)return;
+ const nb=nextBirthday(p.birth), hb=halfBirthday(p.birth);
+ const msg=`${(p.name||'').replace('見本 ','')}、お誕生日おめでとうございます🌸\n${p.event}でお会いできたこと、うれしく覚えています。\n素敵な1年になりますように！`;
+ document.getElementById('detailBody').innerHTML=`
+  <div class="top">${av(p)}<div><h3 style="margin:0">${esc(p.name||'（名前まだ）')}</h3><small class="empty">${fmt(p.date)}・${esc(p.event)}</small></div></div>
+  ${(p.card||p.shot)?`<div class="photos">${p.card?`<img src="${p.card}" alt="名刺">`:''}${p.shot?`<img src="${p.shot}" alt="ツーショット">`:''}</div>`:''}
+  ${p.voiceUrl?`<div class="kv"><b>声のメモ</b><audio controls src="${p.voiceUrl}" style="width:100%"></audio></div>`:(p.voice?'<div class="kv"><b>声のメモ</b>（見本のため音声なし）</div>':'')}
+  <div class="kv"><b>どんな人・話したこと</b>${esc(p.memo)||'—'}</div>
+  <div class="kv"><b>つながっているSNS</b>${(p.sns&&p.sns.length)?p.sns.map(x=>`<span class="chip">${x}</span>`).join(''):'まだ（またはわからない）'}</div>
+  ${(()=>{const h=honshitsu(p.birth);return h?`<div class="kv" style="border-left:4px solid var(--accent)"><b>本質（誕生日から）</b><span style="font-size:17px;font-weight:bold;color:var(--accent)">${h.type}</span>　${h.gname}<br><small>${h.kw}／${h.legend}</small><br>💬 話し方のコツ：${h.tell}<br><a href="https://brain-market.com/u/fuming35/a/b3AzM4UjMgoTZsNWa0JXY" target="_blank" rel="noopener" style="color:var(--accent);font-size:13px">▶ もっと知りたい方はこちら：『相性診断のトリセツ』（有料）</a></div>`:''})()}<div class="kv"><b>誕生日</b>${p.birth?`${fmt(p.birth)}（次は あと${daysTo(nb)}日）／保険年齢が上がる日：${fmt(iso(hb))}`:'まだ聞いていない'}</div>
+  <div class="chk"><input type="checkbox" id="dDone" ${p.done?'checked':''}><label for="dDone" style="margin:0;color:var(--fg)">${esc(p.next)}　が済んだ</label></div>
+  ${p.birth?`<div class="kv"><b>おめでとうメッセージ（ひな形）</b><div class="copybox" id="hbd">${esc(msg)}</div></div>`:''}
+  <div class="actions">${p.birth?'<button class="btn sub" id="cpMsg">メッセージをコピー</button>':''}<button class="btn" id="closeD">とじる</button></div>`;
+ const d=document.getElementById('detailDlg'); d.showModal();
+ document.getElementById('closeD').onclick=()=>d.close();
+ document.getElementById('dDone').onchange=async e=>{p.done=e.target.checked; if(!p.sample) await put(p); render()};
+ const cm=document.getElementById('cpMsg'); if(cm) cm.onclick=()=>navigator.clipboard.writeText(msg).then(()=>cm.textContent='コピーしました',()=>cm.textContent='長押しでコピーしてください');
+}
+
+// ===== 登録 =====
+const addDlg=document.getElementById('addDlg');
+document.getElementById('addBtn').onclick=()=>{cardImg=shotImg=voiceUrl='';['w1','w2','w3'].forEach(i=>document.getElementById(i).classList.remove('done'));document.getElementById('addForm').reset();document.getElementById('iDate').value=iso(today);document.getElementById('iNext').value='お礼のLINEを送る';document.getElementById('recBox').hidden=true;addDlg.showModal()};
+document.getElementById('cancelAdd').onclick=()=>addDlg.close();
+function readImg(input,cb,w){input.onchange=()=>{const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const s=Math.min(1,800/Math.max(img.width,img.height));c.width=img.width*s;c.height=img.height*s;c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.8));document.getElementById(w).classList.add('done')};img.src=r.result};r.readAsDataURL(f)}}
+readImg(document.getElementById('fCard'),d=>cardImg=d,'w1');
+readImg(document.getElementById('fShot'),d=>shotImg=d,'w2');
+document.getElementById('w3').onclick=()=>{document.getElementById('recBox').hidden=false};
+let rec=null,chunks=[];
+document.getElementById('recBtn').onclick=async e=>{
+ const b=e.target, st=document.getElementById('recState');
+ if(rec&&rec.state==='recording'){rec.stop();return}
+ try{const s=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];rec=new MediaRecorder(s);
+  rec.ondataavailable=x=>chunks.push(x.data);
+  rec.onstop=()=>{const bl=new Blob(chunks,{type:rec.mimeType});const r=new FileReader();r.onload=()=>{voiceUrl=r.result;st.textContent='録音できました ✓';document.getElementById('w3').classList.add('done')};r.readAsDataURL(bl);s.getTracks().forEach(t=>t.stop());b.textContent='● 録り直す'};
+  rec.start();b.textContent='■ 止める';st.textContent='録音中…'}
+ catch(err){st.textContent='この画面ではマイクが使えません。メモ欄にスマホのマイクで話して入れてください'}
+};
+document.getElementById('saveAdd').onclick=async()=>{
+ const g=id=>document.getElementById(id).value.trim();
+ const colors=['var(--accent)','var(--hd-bg)','var(--gold)'];
+ const p={id:'p'+Date.now(),name:g('iName'),event:g('iEvent')||'（場所の名前なし）',date:g('iDate')||iso(today),birth:g('iBirth'),memo:g('iMemo'),next:g('iNext')||'お礼のLINEを送る',sns:[...document.querySelectorAll('#iSns input:checked')].map(x=>x.value),done:false,card:cardImg,shot:shotImg,voiceUrl,voice:!!voiceUrl,color:colors[Math.floor(Math.random()*colors.length)]};
+ if(!p.name&&!p.card&&!p.shot&&!p.voiceUrl&&!p.memo){document.getElementById('iName').placeholder='写真・声・名前・メモのどれかを入れてください';document.getElementById('iName').focus();return}
+ await put(p);addDlg.close();await load();
+};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');tab=b.dataset.tab;render()});
+// ===== 色えらび =====
+const THEMES=[["red","朱赤・黒・白・金",["#0d0d0d","#d1201b","#ffffff","#b39150"]],["moss","モスグリーン・シャンパン",["#2f3a27","#55663f","#f6f5f0","#b89b5e"]],["bordeaux","ボルドー・金",["#3b0d18","#7b1830","#fbf8f6","#b08a4f"]],["navy","ネイビー・金",["#121a2b","#1d2f5c","#f7f8fa","#b6944f"]],["noir","黒・金",["#000000","#1b1b1b","#c9a95c","#f4f1ea"]]];
+function setTheme(t){if(t==='red')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('goen-theme',t)}catch(e){};drawSw()}
+function drawSw(){const cur=document.documentElement.getAttribute('data-theme')||'red';document.getElementById('swatches').innerHTML=THEMES.map(([k,n,c])=>`<button type="button" class="sw ${k===cur?'on':''}" data-t="${k}"><i>${c.map(x=>`<b style="background:${x}"></b>`).join('')}</i>${n}</button>`).join('');document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>setTheme(b.dataset.t))}
+try{const t=localStorage.getItem('goen-theme');if(t&&t!=='red')document.documentElement.setAttribute('data-theme',t)}catch(e){}
+document.getElementById('themeBtn').onclick=()=>{drawSw();document.getElementById('themeDlg').showModal()};
+document.getElementById('closeTheme').onclick=()=>document.getElementById('themeDlg').close();
+load();
+</script>
+</body>
+</html>
