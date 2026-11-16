@@ -6,9 +6,10 @@
 <title>未来のご縁帳</title>
 <style>
 :root{
-  --bg:#ffffff; --card:#ffffff; --fg:#111111; --sub:#6b6461; --line:#e7e2de;
-  --accent:#d1201b; --accent-soft:#fcecea; --gold:#b39150; --ok:#2e6b4f;
-  --hd-bg:#0d0d0d; --hd-fg:#ffffff; --hd-sub:#c9a95c; --shadow:rgba(209,32,27,.35);
+  --bg:#ffffff; --card:#ffffff; --fg:#2b2726; --sub:#7a716d; --line:#efe7e4;
+  --accent:#e7372e; --accent-soft:#fdeceb; --gold:#c9a27a; --ok:#2e6b4f;
+  --hd-bg:#ffffff; --hd-fg:#e7372e; --hd-sub:#8a7d77; --shadow:rgba(231,55,46,.35);
+  --hd-line:linear-gradient(90deg,#e7372e 0%,#f2c9a8 55%,#c9a27a 100%);
 }
 :root[data-theme="moss"]{--bg:#f6f5f0;--card:#fff;--fg:#1f2a20;--sub:#6a705f;--line:#e3e1d6;--accent:#55663f;--accent-soft:#eceee3;--gold:#b89b5e;--hd-bg:#2f3a27;--hd-fg:#fbf8ef;--hd-sub:#d8c38f;--shadow:rgba(85,102,63,.35)}
 :root[data-theme="bordeaux"]{--bg:#fbf8f6;--card:#fff;--fg:#26161a;--sub:#7a6468;--line:#ece1e3;--accent:#7b1830;--accent-soft:#f5e6ea;--gold:#b08a4f;--hd-bg:#3b0d18;--hd-fg:#fff;--hd-sub:#d9b779;--shadow:rgba(123,24,48,.35)}
@@ -17,7 +18,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;font-size:16px;line-height:1.6}
-header{position:sticky;top:0;z-index:5;background:var(--hd-bg);color:var(--hd-fg);border-bottom:2px solid var(--gold);padding:12px max(16px,env(safe-area-inset-left)) 8px}
+header{position:sticky;top:0;z-index:5;background:var(--hd-bg);color:var(--hd-fg);border-bottom:none;overflow:hidden;padding:12px max(16px,env(safe-area-inset-left)) 8px}
 h1{margin:0;font-size:20px;letter-spacing:.12em;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px}
 h1 small{font-size:12px;color:var(--hd-sub);letter-spacing:.05em;font-weight:normal;margin-left:6px}
 nav{display:flex;gap:6px;margin-top:8px;overflow-x:auto}
@@ -77,6 +78,12 @@ textarea{min-height:70px}
 .sw.on{border-color:var(--accent)}
 .sw i{display:inline-flex;border-radius:999px;overflow:hidden;width:42px;height:18px}
 .sw i b{flex:1}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--hd-line,var(--gold))}
+header::before{content:"";position:absolute;right:0;top:0;width:0;height:0;border-top:34px solid var(--accent);border-left:34px solid transparent}
+:root:not([data-theme]) nav button{border-color:var(--line);color:var(--fg)}
+:root:not([data-theme]) nav button.on{color:#fff}
+:root:not([data-theme]) .theme{border-color:var(--accent);color:var(--accent)}
+.face .ph::after{content:"";position:absolute;left:10px;bottom:10px;width:10px;height:10px;background:linear-gradient(135deg,#fff 0%,#e8eef2 45%,#fff 55%,#cfd8de 100%);transform:rotate(45deg);opacity:.85;border-radius:2px;box-shadow:0 0 6px rgba(255,255,255,.8)}
 </style>
 </head>
 <body>
@@ -158,9 +165,9 @@ function iso(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-
 function addDays(n){const d=new Date(today);d.setDate(d.getDate()+n);return d}
 const SAMPLE=[
  {id:'s1',name:'見本 さくらさん',event:'赤坂の交流会',date:iso(addDays(-1)),birth:'1968-'+iso(addDays(5)).slice(5),memo:'保険代理店。お子さんが2人。名刺入れが赤',sns:['LINE','Facebook'],next:'お礼のLINEを送る',done:false,color:'var(--accent)',sample:true},
- {id:'s2',name:'見本 たろうさん',event:'赤坂の交流会',date:iso(addDays(-1)),birth:'',memo:'税理士。ゴルフ好き。声で登録（写真なし）',next:'資料を送る',done:false,color:'var(--hd-bg)',voice:true,sample:true},
+ {id:'s2',name:'見本 たろうさん',event:'赤坂の交流会',date:iso(addDays(-1)),birth:'',memo:'税理士。ゴルフ好き。声で登録（写真なし）',next:'資料を送る',done:false,color:'#3a3534',voice:true,sample:true},
  {id:'s3',name:'見本 ゆりさん',event:'渋谷の交流会',date:iso(addDays(-21)),birth:'1972-'+iso(addDays(40)).slice(5),memo:'カフェ開業を準備中。帝王交渉術に興味',sns:['Facebook','Instagram'],next:'ランチに誘う',done:true,color:'var(--gold)',sample:true},
- {id:'s4',name:'見本 けんさん',event:'渋谷の交流会',date:iso(addDays(-21)),birth:'1965-'+iso(addDays(-150)).slice(5),memo:'中小企業診断士。AIに興味あり',next:'AIの事例を送る',done:false,color:'#3a3a3a',sample:true},
+ {id:'s4',name:'見本 けんさん',event:'渋谷の交流会',date:iso(addDays(-21)),birth:'1965-'+iso(addDays(-150)).slice(5),memo:'中小企業診断士。AIに興味あり',next:'AIの事例を送る',done:false,color:'#f08c84',sample:true},
 ];
 
 let people=[], tab='faces', cardImg='', shotImg='', voiceUrl='';
@@ -248,14 +255,14 @@ document.getElementById('recBtn').onclick=async e=>{
 };
 document.getElementById('saveAdd').onclick=async()=>{
  const g=id=>document.getElementById(id).value.trim();
- const colors=['var(--accent)','var(--hd-bg)','var(--gold)'];
+ const colors=['var(--accent)','#3a3534','var(--gold)','#f08c84'];
  const p={id:'p'+Date.now(),name:g('iName'),event:g('iEvent')||'（場所の名前なし）',date:g('iDate')||iso(today),birth:g('iBirth'),memo:g('iMemo'),next:g('iNext')||'お礼のLINEを送る',sns:[...document.querySelectorAll('#iSns input:checked')].map(x=>x.value),done:false,card:cardImg,shot:shotImg,voiceUrl,voice:!!voiceUrl,color:colors[Math.floor(Math.random()*colors.length)]};
  if(!p.name&&!p.card&&!p.shot&&!p.voiceUrl&&!p.memo){document.getElementById('iName').placeholder='写真・声・名前・メモのどれかを入れてください';document.getElementById('iName').focus();return}
  await put(p);addDlg.close();await load();
 };
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');tab=b.dataset.tab;render()});
 // ===== 色えらび =====
-const THEMES=[["red","朱赤・黒・白・金",["#0d0d0d","#d1201b","#ffffff","#b39150"]],["moss","モスグリーン・シャンパン",["#2f3a27","#55663f","#f6f5f0","#b89b5e"]],["bordeaux","ボルドー・金",["#3b0d18","#7b1830","#fbf8f6","#b08a4f"]],["navy","ネイビー・金",["#121a2b","#1d2f5c","#f7f8fa","#b6944f"]],["noir","黒・金",["#000000","#1b1b1b","#c9a95c","#f4f1ea"]]];
+const THEMES=[["red","朱赤・白（名刺の色）",["#ffffff","#e7372e","#c9a27a","#2b2726"]],["moss","モスグリーン・シャンパン",["#2f3a27","#55663f","#f6f5f0","#b89b5e"]],["bordeaux","ボルドー・金",["#3b0d18","#7b1830","#fbf8f6","#b08a4f"]],["navy","ネイビー・金",["#121a2b","#1d2f5c","#f7f8fa","#b6944f"]],["noir","黒・金",["#000000","#1b1b1b","#c9a95c","#f4f1ea"]]];
 function setTheme(t){if(t==='red')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('goen-theme',t)}catch(e){};drawSw()}
 function drawSw(){const cur=document.documentElement.getAttribute('data-theme')||'red';document.getElementById('swatches').innerHTML=THEMES.map(([k,n,c])=>`<button type="button" class="sw ${k===cur?'on':''}" data-t="${k}"><i>${c.map(x=>`<b style="background:${x}"></b>`).join('')}</i>${n}</button>`).join('');document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>setTheme(b.dataset.t))}
 try{const t=localStorage.getItem('goen-theme');if(t&&t!=='red')document.documentElement.setAttribute('data-theme',t)}catch(e){}
