@@ -12,10 +12,12 @@ const MODELS = ['@cf/meta/llama-4-scout-17b-16e-instruct', '@cf/mistralai/mistra
 export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return json({ error: 'bad request' }, 400); }
-  const image = body && body.image;
-  if (typeof image !== 'string' || !image.startsWith('data:image/') || image.length > 6_000_000) return json({ error: 'bad image' }, 400);
+  const imgs = (Array.isArray(body && body.images) ? body.images : [body && body.image]).filter(x => typeof x === 'string' && x.startsWith('data:image/') && x.length < 6_000_000).slice(0, 3);
+  if (!imgs.length) return json({ error: 'bad image' }, 400);
 
-  const results = await Promise.all(MODELS.map(m => readWith(env, m, image)));
+  const jobs = [];
+  for (const img of imgs) for (const m of MODELS) jobs.push(readWith(env, m, img));
+  const results = await Promise.all(jobs);
   const ok = results.filter(r => r.cards && r.cards.length);
   if (!ok.length) return json({ error: 'read failed', detail: results.map(r => r.err).filter(Boolean) }, 502);
   ok.sort((a, b) => score(b.cards) - score(a.cards));
@@ -49,7 +51,7 @@ function score(cards) {
   for (const c of cards) for (const k of ['name', 'yomi', 'company', 'title', 'mobile', 'tel', 'email']) if (c[k]) p += k === 'yomi' ? 2 : 1;
   return p + (cards.length > 1 ? 3 : 0);
 }
-const ph = v => (typeof v === 'string' ? v.replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0)).replace(/[－ー―‐]/g, '-').replace(/[^0-9+\-]/g, '').slice(0, 20) : '');
+const ph = v => { if (typeof v !== 'string') return ''; const t = v.replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0)).replace(/[－ー―‐]/g, '-').replace(/[^0-9+\-]/g, '').slice(0, 20); const n = t.replace(/\D/g, '').length; return n >= 10 && n <= 12 && /^(\+|0)/.test(t) ? t : ''; };
 const s = v => (typeof v === 'string' ? v.trim().slice(0, 80) : '');
 function json(o, st = 200) {
   return new Response(JSON.stringify(o), { status: st, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
