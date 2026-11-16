@@ -1,7 +1,7 @@
 // 名刺の写真から、名前・会社名・肩書き・電話・メールを読む。写真は読むときだけ受け取り、保存しない
 const PROMPT = `これは日本の名刺の写真です。
 ・写真は横向きや逆さまのことがあります。向きを頭の中で直してから読んでください。
-・名刺が2枚以上写っていることがあります（同じ人の別の会社の名刺など）。1枚ずつ分けて読み、別の名刺の情報を混ぜないでください。
+・名刺が2枚以上写っていたら、いちばん大きく写っている1枚だけを読んでください。
 ・名前の上や横に読みがな（ひらがな・ローマ字）があれば、それも書いてください。漢字は読みがなと合う字を選んでください。
 ・会社名と肩書きは、名刺に書いてある表記のまま。カタカナならカタカナ。英語に言いかえない。
 ・書いていないことは空文字。推測で作らない。
@@ -20,12 +20,20 @@ export async function onRequestPost({ request, env }) {
   const results = await Promise.all(jobs);
   const ok = results.filter(r => r.cards && r.cards.length);
   if (!ok.length) return json({ error: 'read failed', detail: results.map(r => r.err).filter(Boolean) }, 502);
-  ok.sort((a, b) => score(b.cards) - score(a.cards));
-  const cards = ok[0].cards;
-  const first = cards.find(c => c.name) || cards[0];
-  const pick = k => first[k] || (cards.find(c => c[k]) || {})[k] || '';
-  return json({ name: first.name, yomi: first.yomi, company: first.company, title: first.title, mobile: pick('mobile'), tel: pick('tel'), email: pick('email'), cards, model: ok[0].model });
+  // 多数決：2回以上同じ答えが出たものだけ使う（1回だけの番号やメールは作り話の可能性が高い）
+  const firsts = ok.map(r => r.cards.find(c => c.name) || r.cards[0]);
+  const vote = (k, need) => {
+    const cnt = new Map();
+    for (const c of firsts) { const v = c[k]; if (!v) continue; const key = norm(v); const e = cnt.get(key) || { v, n: 0 }; e.n++; cnt.set(key, e); }
+    let best = null; for (const e of cnt.values()) if (!best || e.n > best.n) best = e;
+    return best && best.n >= need ? best.v : '';
+  };
+  const out = { name: vote('name', 2) || firsts[0].name, yomi: vote('yomi', 2), company: vote('company', 2), title: vote('title', 2), mobile: vote('mobile', 2), tel: vote('tel', 2), email: vote('email', 2) };
+  if (out.tel && out.mobile && norm(out.tel) === norm(out.mobile)) out.tel = '';
+  return json({ ...out, cards: [out], votes: firsts.length });
 }
+
+const norm = v => { const t = String(v).replace(/\s|　/g, '').toLowerCase(); return /^[0-9+\-]+$/.test(t) ? t.replace(/\D/g, '') : t; };
 
 async function readWith(env, model, image) {
   try {
@@ -45,7 +53,6 @@ async function readWith(env, model, image) {
   } catch (e) { return { model, err: model + ': ' + String(e && e.message || e).slice(0, 160) }; }
 }
 
-// 読めた項目が多く、名刺を分けて読めているほど高い点
 function score(cards) {
   let p = 0;
   for (const c of cards) for (const k of ['name', 'yomi', 'company', 'title', 'mobile', 'tel', 'email']) if (c[k]) p += k === 'yomi' ? 2 : 1;
