@@ -50,7 +50,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 .dlg h3{margin:0 0 10px}
 label{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
 input,textarea,select{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--card);color:var(--fg)}
-textarea{min-height:70px}
+textarea{min-height:70px;field-sizing:content;max-height:260px}
 .ways{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .way{border:1px dashed var(--accent);border-radius:12px;padding:10px 4px;text-align:center;font-size:13px;color:var(--accent);background:var(--accent-soft);cursor:pointer;position:relative}
 .way input{position:absolute;inset:0;opacity:0}
@@ -261,8 +261,9 @@ function readImg(input,cb,w,max=800){input.onchange=async()=>{const f=input.file
  let src;try{src=await createImageBitmap(f,{imageOrientation:'from-image'})}catch(e){src=await new Promise(ok=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>ok(im);im.src=r.result};r.readAsDataURL(f)})}
  const W=src.width,H=src.height,sc=Math.min(1,max/Math.max(W,H));const c=document.createElement('canvas');c.width=Math.round(W*sc);c.height=Math.round(H*sc);c.getContext('2d').drawImage(src,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.85));document.getElementById(w).classList.add('done')}}
 readImg(document.getElementById('fCard'),d=>{cardImg=d;readMeishi(d)},'w1',2000);
-async function readMeishi(d){const st=document.getElementById('ocrState');st.hidden=false;st.textContent='名刺を読んでいます…';
- try{const r=await fetch('/api/meishi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({image:d})});const o=await r.json();
+function rot(d,deg){return new Promise(ok=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.height;c.height=im.width;const x=c.getContext('2d');x.translate(c.width/2,c.height/2);x.rotate(deg*Math.PI/180);x.drawImage(im,-im.width/2,-im.height/2);ok(c.toDataURL('image/jpeg',.85))};im.src=d})}
+async function readMeishi(d){const st=document.getElementById('ocrState');st.hidden=false;st.textContent='名刺を読んでいます…（10秒ほど）';
+ try{const imgs=[d,await rot(d,90),await rot(d,-90)];const r=await fetch('/api/meishi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({images:imgs})});const o=await r.json();
   if(!r.ok||o.error)throw 0;
   const n=document.getElementById('iName');if(o.name&&!n.value.trim())n.value=o.name+'さん';
   const emails=(o.email||'').split(/[\s,、]+/).filter(Boolean);
@@ -270,7 +271,7 @@ async function readMeishi(d){const st=document.getElementById('ocrState');st.hid
   const cards=(o.cards&&o.cards.length?o.cards:[o]);
   const lines=[];if(o.yomi)lines.push('（よみ：'+o.yomi+'）');
   cards.forEach((c,i)=>{const l=[c.company,c.title].filter(Boolean).join('　');const more=[];if(i>0){if(c.mobile&&c.mobile!==o.mobile)more.push('携帯 '+c.mobile);if(c.tel&&c.tel!==o.tel)more.push('電話 '+c.tel);}const em=(c.email||'').split(/[\s,、]+/).filter(x=>x&&x!==emails[0]);em.forEach(x=>more.push('メール '+x));const line=[l,more.join('　')].filter(Boolean).join('　');if(line)lines.push(line)});
-  const extra=lines.join('\n');const mm=document.getElementById('iMemo');if(extra&&!mm.value.includes(extra))mm.value=(extra+(mm.value?'\n'+mm.value:''));
+  const extra=lines.join('\n');const mm=document.getElementById('iMemo');if(extra&&!mm.value.includes(extra))mm.value=(extra+(mm.value?'\n'+mm.value:''));mm.style.height='auto';mm.style.height=Math.min(260,mm.scrollHeight+4)+'px';
   st.textContent=(o.name||extra)?'名刺から読みました。まちがいがあれば直してください':'名刺の文字が読めませんでした。手で入れてください'}
  catch(e){st.textContent='名刺の文字が読めませんでした。手で入れてください'}}
 readImg(document.getElementById('fShot'),d=>shotImg=d,'w2');
