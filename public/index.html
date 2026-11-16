@@ -257,13 +257,20 @@ document.getElementById('addBtn').onclick=()=>{editId='';document.querySelector(
 function openEdit(p){editId=p.id;document.getElementById('addForm').reset();document.querySelector('#addForm h3').textContent='内容を直す';document.getElementById('saveAdd').textContent='保存する';cardImg=p.card||'';shotImg=p.shot||'';voiceUrl=p.voiceUrl||'';['w1','w2','w3'].forEach(i=>document.getElementById(i).classList.remove('done'));if(cardImg)document.getElementById('w1').classList.add('done');if(shotImg)document.getElementById('w2').classList.add('done');if(voiceUrl)document.getElementById('w3').classList.add('done');document.getElementById('recBox').hidden=true;document.getElementById('ocrState').hidden=true;
  const v=(i,x)=>document.getElementById(i).value=x||'';v('iName',p.name);v('iEvent',p.event==='（場所の名前なし）'?'':p.event);v('iDate',p.date);v('iBirth',p.birth);v('iMemo',p.memo);v('iNext',p.next);v('iMobile',p.mobile);v('iTel',p.tel);v('iMail',p.email);document.querySelectorAll('#iSns input').forEach(c=>c.checked=(p.sns||[]).includes(c.value));addDlg.showModal()}
 document.getElementById('cancelAdd').onclick=()=>addDlg.close();
-function readImg(input,cb,w,max=800){input.onchange=()=>{const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const s=Math.min(1,max/Math.max(img.width,img.height));c.width=img.width*s;c.height=img.height*s;c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.8));document.getElementById(w).classList.add('done')};img.src=r.result};r.readAsDataURL(f)}}
-readImg(document.getElementById('fCard'),d=>{cardImg=d;readMeishi(d)},'w1',1400);
+function readImg(input,cb,w,max=800){input.onchange=async()=>{const f=input.files[0];if(!f)return;
+ let src;try{src=await createImageBitmap(f,{imageOrientation:'from-image'})}catch(e){src=await new Promise(ok=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>ok(im);im.src=r.result};r.readAsDataURL(f)})}
+ const W=src.width,H=src.height,sc=Math.min(1,max/Math.max(W,H));const c=document.createElement('canvas');c.width=Math.round(W*sc);c.height=Math.round(H*sc);c.getContext('2d').drawImage(src,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.85));document.getElementById(w).classList.add('done')}}
+readImg(document.getElementById('fCard'),d=>{cardImg=d;readMeishi(d)},'w1',2000);
 async function readMeishi(d){const st=document.getElementById('ocrState');st.hidden=false;st.textContent='名刺を読んでいます…';
  try{const r=await fetch('/api/meishi',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({image:d})});const o=await r.json();
   if(!r.ok||o.error)throw 0;
-  const n=document.getElementById('iName');if(o.name&&!n.value.trim())n.value=o.name+'さん';[['iMobile',o.mobile],['iTel',o.tel],['iMail',o.email]].forEach(([i,v])=>{const e=document.getElementById(i);if(v&&!e.value.trim())e.value=v});
-  const extra=(o.cards&&o.cards.length?o.cards:[o]).map(c=>[c.company,c.title].filter(Boolean).join('　')).filter(Boolean).join('\n');const mm=document.getElementById('iMemo');if(extra&&!mm.value.includes(extra))mm.value=(extra+(mm.value?'\n'+mm.value:''));
+  const n=document.getElementById('iName');if(o.name&&!n.value.trim())n.value=o.name+'さん';
+  const emails=(o.email||'').split(/[\s,、]+/).filter(Boolean);
+  [['iMobile',o.mobile],['iTel',o.tel],['iMail',emails[0]]].forEach(([i,v])=>{const e=document.getElementById(i);if(v&&!e.value.trim())e.value=v});
+  const cards=(o.cards&&o.cards.length?o.cards:[o]);
+  const lines=[];if(o.yomi)lines.push('（よみ：'+o.yomi+'）');
+  cards.forEach((c,i)=>{const l=[c.company,c.title].filter(Boolean).join('　');const more=[];if(i>0){if(c.mobile&&c.mobile!==o.mobile)more.push('携帯 '+c.mobile);if(c.tel&&c.tel!==o.tel)more.push('電話 '+c.tel);}const em=(c.email||'').split(/[\s,、]+/).filter(x=>x&&x!==emails[0]);em.forEach(x=>more.push('メール '+x));const line=[l,more.join('　')].filter(Boolean).join('　');if(line)lines.push(line)});
+  const extra=lines.join('\n');const mm=document.getElementById('iMemo');if(extra&&!mm.value.includes(extra))mm.value=(extra+(mm.value?'\n'+mm.value:''));
   st.textContent=(o.name||extra)?'名刺から読みました。まちがいがあれば直してください':'名刺の文字が読めませんでした。手で入れてください'}
  catch(e){st.textContent='名刺の文字が読めませんでした。手で入れてください'}}
 readImg(document.getElementById('fShot'),d=>shotImg=d,'w2');
